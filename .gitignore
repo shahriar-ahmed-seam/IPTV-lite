@@ -24,3 +24,7 @@ pulled_cache.m3u8
 
 # Release APK artifacts (attach to GitHub Releases, don't commit)
 Tarango-v*.apk
+
+# Source art (already processed into app/src/main/res) and personal notes
+art/
+info.txt
