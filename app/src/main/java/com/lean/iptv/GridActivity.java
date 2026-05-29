@@ -219,7 +219,7 @@ public class GridActivity extends AppCompatActivity {
         if (favoritesMode) {
             // Leave favourites, back to normal source view.
             favoritesMode = false;
-            categoryBar.setVisibility(View.VISIBLE);
+            favButton.setSelected(false);
             showCategory(currentCategory);
         } else {
             showFavorites();
@@ -228,9 +228,11 @@ public class GridActivity extends AppCompatActivity {
 
     private void showFavorites() {
         favoritesMode = true;
+        favButton.setSelected(true); // visually mark the star button as active
         searching = false;
         if (searchBox.getText().length() > 0) searchBox.setText("");
-        categoryBar.setVisibility(View.GONE);
+        // Keep the category bar visible so tapping any category returns to channels.
+        categoryBar.setVisibility(View.VISIBLE);
 
         List<Channel> favs = favorites.list();
         repo.setBucket(ChannelRepository.FAVORITES, favs);
@@ -238,7 +240,7 @@ public class GridActivity extends AppCompatActivity {
 
         if (favs.isEmpty()) {
             statusText.setVisibility(View.VISIBLE);
-            statusText.setText("No favourites yet.\nLong-press any channel (or tap its star) to add it.");
+            statusText.setText("No favourites yet.\nLong-press any channel (or tap its star) to add it,\nthen pick a category above to go back.");
             grid.setVisibility(View.GONE);
         } else {
             statusText.setVisibility(View.GONE);
@@ -285,6 +287,7 @@ public class GridActivity extends AppCompatActivity {
         displayedCategories = null;
         searching = false;
         favoritesMode = false;
+        favButton.setSelected(false);
         categoryBar.setVisibility(View.VISIBLE);
         if (searchBox.getText().length() > 0) searchBox.setText("");
         loadSource(source, true);
@@ -392,11 +395,15 @@ public class GridActivity extends AppCompatActivity {
         currentCategory = category;
         // Selecting a category exits search + favourites modes.
         favoritesMode = false;
+        favButton.setSelected(false);
         if (categoryBar.getVisibility() != View.VISIBLE) categoryBar.setVisibility(View.VISIBLE);
         if (searching) {
             searching = false;
             if (searchBox.getText().length() > 0) searchBox.setText("");
         }
+        // Always restore the grid (it may have been hidden by an empty fav/search state).
+        statusText.setVisibility(View.GONE);
+        grid.setVisibility(View.VISIBLE);
         if (grid.isComputingLayout()) {
             grid.post(() -> {
                 gridAdapter.setData(repo.getChannels(category));

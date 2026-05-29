@@ -64,21 +64,25 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.VH> {
         // IMPORTANT: do NOT call notifyItemChanged() here; this fires during
         // scroll/layout and would crash the RecyclerView. Update state directly + posted.
         h.itemView.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) select(h.getBindingAdapterPosition());
+            if (hasFocus) select(h.getBindingAdapterPosition(), false);
         });
-        h.itemView.setOnClickListener(v -> select(h.getBindingAdapterPosition()));
+        // A deliberate click always notifies (even on the current chip), so it can be
+        // used to exit favourites/search back to this category.
+        h.itemView.setOnClickListener(v -> select(h.getBindingAdapterPosition(), true));
     }
 
-    private void select(int pos) {
+    private void select(int pos, boolean force) {
         if (pos < 0 || pos >= categories.size()) return;
-        if (pos == selectedPos) return;
+        if (pos == selectedPos && !force) return;
 
         final int old = selectedPos;
         selectedPos = pos;
 
         // Update the visible chips' highlight directly (safe during scroll).
-        updateSelectedState(old);
-        updateSelectedState(pos);
+        if (old != pos) {
+            updateSelectedState(old);
+            updateSelectedState(pos);
+        }
 
         if (listener != null) listener.onSelected(categories.get(pos));
     }
