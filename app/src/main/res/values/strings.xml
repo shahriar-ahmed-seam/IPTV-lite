@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Tarango</string>
+    <!-- In-app brand: "Tarango" written in Bengali script (তরঙ্গ), rendered with the
+         bundled Noto Sans Bengali font so it works even if the box lacks Bengali fonts. -->
+    <string name="brand_title">তরঙ্গ</string>
 </resources>

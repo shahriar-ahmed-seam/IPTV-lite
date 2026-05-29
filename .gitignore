@@ -21,3 +21,6 @@ build_out.txt
 _updatetest/
 u*.xml
 pulled_cache.m3u8
+
+# Release APK artifacts (attach to GitHub Releases, don't commit)
+Tarango-v*.apk
