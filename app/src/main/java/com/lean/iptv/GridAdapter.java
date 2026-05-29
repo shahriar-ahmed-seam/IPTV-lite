@@ -12,18 +12,32 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Grid of channel tiles. RecyclerView recycles views, so 250 tiles stay light. */
+/** Grid of channel tiles. RecyclerView recycles views, so many tiles stay light. */
 public class GridAdapter extends RecyclerView.Adapter<GridAdapter.VH> {
 
     public interface OnTileClick {
         void onClick(int position, Channel channel);
     }
 
+    public interface OnStarClick {
+        void onStar(int position, Channel channel, boolean currentlyFavorite);
+    }
+
     private final List<Channel> data = new ArrayList<>();
     private final OnTileClick listener;
+    private OnStarClick starListener;
+    private Favorites favorites;
 
     public GridAdapter(OnTileClick listener) {
         this.listener = listener;
+    }
+
+    public void setStarListener(OnStarClick l) {
+        this.starListener = l;
+    }
+
+    public void setFavorites(Favorites f) {
+        this.favorites = f;
     }
 
     public void setData(List<Channel> channels) {
@@ -45,13 +59,36 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.VH> {
         Channel c = data.get(position);
         h.number.setText("#" + (position + 1));
         h.name.setText(c.name);
-        // Lazy logo load; tile shows just the name if it fails or is slow.
         LogoLoader.get(h.itemView.getContext()).load(c.logo, h.logo);
 
+        boolean fav = favorites != null && favorites.isFavorite(c.url);
+        h.star.setImageResource(fav ? R.drawable.ic_star_gold : R.drawable.ic_star_gray);
+
         h.itemView.setOnClickListener(v -> {
-            int p = h.getAdapterPosition();
+            int p = h.getBindingAdapterPosition();
             if (p != RecyclerView.NO_POSITION && listener != null) {
                 listener.onClick(p, data.get(p));
+            }
+        });
+
+        // Long-press a tile to toggle its favourite (TV-friendly: no extra focus stop).
+        h.itemView.setOnLongClickListener(v -> {
+            int p = h.getBindingAdapterPosition();
+            if (p != RecyclerView.NO_POSITION && starListener != null) {
+                Channel ch = data.get(p);
+                boolean isFav = favorites != null && favorites.isFavorite(ch.url);
+                starListener.onStar(p, ch, isFav);
+                return true;
+            }
+            return false;
+        });
+
+        h.star.setOnClickListener(v -> {
+            int p = h.getBindingAdapterPosition();
+            if (p != RecyclerView.NO_POSITION && starListener != null) {
+                Channel ch = data.get(p);
+                boolean isFav = favorites != null && favorites.isFavorite(ch.url);
+                starListener.onStar(p, ch, isFav);
             }
         });
     }
@@ -63,11 +100,13 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.VH> {
 
     static class VH extends RecyclerView.ViewHolder {
         final ImageView logo;
+        final ImageView star;
         final TextView number;
         final TextView name;
         VH(View v) {
             super(v);
             logo = v.findViewById(R.id.tileLogo);
+            star = v.findViewById(R.id.tileStar);
             number = v.findViewById(R.id.tileNumber);
             name = v.findViewById(R.id.tileName);
         }

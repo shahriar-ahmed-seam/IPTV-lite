@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Grid tile background. Strong red border + fill on D-pad focus. -->
+<!-- Grid tile background. Glowing violet gradient + bright border on D-pad focus. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/item_focused" />
-            <corners android:radius="8dp" />
-            <stroke android:width="3dp" android:color="@color/text_focused" />
+            <gradient
+                android:startColor="@color/accent"
+                android:endColor="@color/accent_deep"
+                android:angle="135" />
+            <corners android:radius="12dp" />
+            <stroke android:width="2dp" android:color="@color/text_focused" />
+        </shape>
+    </item>
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/item_selected" />
+            <corners android:radius="12dp" />
+            <stroke android:width="1dp" android:color="@color/accent" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/tile_idle" />
-            <corners android:radius="8dp" />
+            <gradient
+                android:startColor="@color/tile_idle2"
+                android:endColor="@color/tile_idle"
+                android:angle="135" />
+            <corners android:radius="12dp" />
             <stroke android:width="1dp" android:color="@color/tile_stroke" />
         </shape>
     </item>

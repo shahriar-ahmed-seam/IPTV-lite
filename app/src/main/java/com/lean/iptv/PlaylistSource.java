@@ -28,12 +28,12 @@ public final class PlaylistSource {
     public static List<PlaylistSource> all() {
         return Arrays.asList(
             new PlaylistSource(
-                "Bangla TV",
+                "Source 1",
                 "https://raw.githubusercontent.com/imShakil/tvlink/main/iptv.m3u8",
                 "cache_bangla.m3u8",
                 "iptv.m3u8"),
             new PlaylistSource(
-                "Sports & More",
+                "Source 2",
                 "https://raw.githubusercontent.com/ashik4u/mrgify-clean/main/playlist.m3u",
                 "cache_sports.m3u8",
                 "sports.m3u8"),

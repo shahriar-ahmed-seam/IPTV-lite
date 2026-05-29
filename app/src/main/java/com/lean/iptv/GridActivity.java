@@ -1,10 +1,17 @@
 package com.lean.iptv;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,18 +22,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-/** Launcher screen: source dropdown + category bar + channel grid. */
+/** Launcher screen: source dropdown + search + favourites + category bar + channel grid. */
 public class GridActivity extends AppCompatActivity {
 
     private static final int GRID_COLUMNS = 4;
+    private static final long SEARCH_DEBOUNCE_MS = 220;
 
     private Spinner sourceSpinner;
+    private EditText searchBox;
+    private ImageView favButton;
     private RecyclerView categoryBar;
     private RecyclerView grid;
     private TextView statusText;
 
     private CategoryAdapter categoryAdapter;
     private GridAdapter gridAdapter;
+    private Favorites favorites;
 
     private final ChannelRepository repo = ChannelRepository.get();
     private List<PlaylistSource> sources;
@@ -34,10 +45,16 @@ public class GridActivity extends AppCompatActivity {
 
     private String currentCategory = ChannelRepository.ALL;
     private boolean uiBuilt = false;
+    private boolean favoritesMode = false;
     private List<String> displayedCategories = null;
 
     // Guards the spinner's automatic onItemSelected at setup time.
     private boolean spinnerReady = false;
+
+    // Search state
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
+    private boolean searching = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +62,13 @@ public class GridActivity extends AppCompatActivity {
         setContentView(R.layout.activity_grid);
 
         sourceSpinner = findViewById(R.id.sourceSpinner);
+        searchBox = findViewById(R.id.searchBox);
+        favButton = findViewById(R.id.favButton);
         categoryBar = findViewById(R.id.categoryBar);
         grid = findViewById(R.id.grid);
         statusText = findViewById(R.id.statusText);
+
+        favorites = Favorites.get(this);
 
         categoryBar.setLayoutManager(
                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -55,12 +76,16 @@ public class GridActivity extends AppCompatActivity {
         grid.setHasFixedSize(true);
 
         gridAdapter = new GridAdapter((pos, channel) -> openPlayer(pos));
+        gridAdapter.setFavorites(favorites);
+        gridAdapter.setStarListener((pos, channel, isFav) -> onStarClicked(channel));
         grid.setAdapter(gridAdapter);
 
         sources = PlaylistSource.all();
         currentSourceIndex = clampSourceIndex(Prefs.lastSourceIndex(this));
 
         setupSourceSpinner();
+        setupSearch();
+        favButton.setOnClickListener(v -> toggleFavoritesView());
 
         // Warm every source's playlist + logos once, so switching is instant later.
         repo.warmAllSources(this, sources);
@@ -102,6 +127,130 @@ public class GridActivity extends AppCompatActivity {
         });
     }
 
+    // ---------- search (scoped to the active source) ----------
+
+    private void setupSearch() {
+        searchBox.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                final String q = s.toString();
+                // Debounce so we don't refilter on every keystroke (fast + smooth).
+                if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+                searchRunnable = () -> applySearch(q);
+                searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS);
+            }
+        });
+    }
+
+    private void applySearch(String query) {
+        if (!uiBuilt) return;
+        String q = query == null ? "" : query.trim();
+
+        if (q.isEmpty()) {
+            // Exit search mode: restore the current category view.
+            if (searching) {
+                searching = false;
+                showCategory(currentCategory);
+            }
+            return;
+        }
+
+        searching = true;
+        List<Channel> results = repo.search(q);
+        gridAdapter.setData(results);
+        if (results.isEmpty()) {
+            statusText.setVisibility(View.VISIBLE);
+            statusText.setText("No channels match \"" + q + "\"");
+            grid.setVisibility(View.GONE);
+        } else {
+            statusText.setVisibility(View.GONE);
+            grid.setVisibility(View.VISIBLE);
+            grid.scrollToPosition(0);
+        }
+    }
+
+    // ---------- favourites ----------
+
+    /** Star tapped on a tile. Add (with confirm) anywhere; remove (with confirm) in fav view. */
+    private void onStarClicked(final Channel channel) {
+        if (channel == null) return;
+        final boolean isFav = favorites.isFavorite(channel.url);
+
+        if (isFav && favoritesMode) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Remove favourite")
+                    .setMessage("Remove \"" + channel.name + "\" from favourites?")
+                    .setPositiveButton("Remove", (d, w) -> {
+                        favorites.remove(channel.url);
+                        showFavorites(); // refresh the favourites grid
+                        Toast.makeText(this, "Removed from favourites", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        } else if (isFav) {
+            // Already a favourite (outside fav view): offer to remove too.
+            new AlertDialog.Builder(this)
+                    .setTitle("Remove favourite")
+                    .setMessage("\"" + channel.name + "\" is already in favourites. Remove it?")
+                    .setPositiveButton("Remove", (d, w) -> {
+                        favorites.remove(channel.url);
+                        gridAdapter.notifyDataSetChanged();
+                        Toast.makeText(this, "Removed from favourites", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle("Add favourite")
+                    .setMessage("Add \"" + channel.name + "\" to favourites?")
+                    .setPositiveButton("Add", (d, w) -> {
+                        favorites.add(channel);
+                        gridAdapter.notifyDataSetChanged(); // turn its star gold
+                        Toast.makeText(this, "Added to favourites", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        }
+    }
+
+    private void toggleFavoritesView() {
+        if (favoritesMode) {
+            // Leave favourites, back to normal source view.
+            favoritesMode = false;
+            categoryBar.setVisibility(View.VISIBLE);
+            showCategory(currentCategory);
+        } else {
+            showFavorites();
+        }
+    }
+
+    private void showFavorites() {
+        favoritesMode = true;
+        searching = false;
+        if (searchBox.getText().length() > 0) searchBox.setText("");
+        categoryBar.setVisibility(View.GONE);
+
+        List<Channel> favs = favorites.list();
+        repo.setBucket(ChannelRepository.FAVORITES, favs);
+        gridAdapter.setData(favs);
+
+        if (favs.isEmpty()) {
+            statusText.setVisibility(View.VISIBLE);
+            statusText.setText("No favourites yet.\nLong-press any channel (or tap its star) to add it.");
+            grid.setVisibility(View.GONE);
+        } else {
+            statusText.setVisibility(View.GONE);
+            grid.setVisibility(View.VISIBLE);
+            grid.scrollToPosition(0);
+            grid.post(() -> {
+                RecyclerView.ViewHolder vh = grid.findViewHolderForAdapterPosition(0);
+                if (vh != null) vh.itemView.requestFocus();
+            });
+        }
+    }
+
     /** Load (or reload) a source via the repository's cache-first pipeline. */
     private void loadSource(final PlaylistSource source, final boolean isSwitch) {
         if (!repo.isLoaded() || isSwitch) {
@@ -134,13 +283,18 @@ public class GridActivity extends AppCompatActivity {
     private void switchToSource(PlaylistSource source) {
         uiBuilt = false;
         displayedCategories = null;
+        searching = false;
+        favoritesMode = false;
+        categoryBar.setVisibility(View.VISIBLE);
+        if (searchBox.getText().length() > 0) searchBox.setText("");
         loadSource(source, true);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (uiBuilt) {
+        // Don't disrupt favourites/search views when returning from the player.
+        if (uiBuilt && !favoritesMode && !searching) {
             String last = Prefs.lastCategory(this);
             if (!last.equals(currentCategory) && repo.getCategories().contains(last)) {
                 currentCategory = last;
@@ -148,6 +302,22 @@ public class GridActivity extends AppCompatActivity {
                 showCategory(last);
             }
         }
+        // Star states may have changed; refresh tile stars.
+        if (uiBuilt) gridAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onBackPressed() {
+        // BACK exits favourites or search first, instead of closing the app.
+        if (favoritesMode) {
+            toggleFavoritesView();
+            return;
+        }
+        if (searching) {
+            searchBox.setText("");
+            return;
+        }
+        super.onBackPressed();
     }
 
     private void buildUi(boolean offline) {
@@ -197,6 +367,15 @@ public class GridActivity extends AppCompatActivity {
         if (!cats.contains(currentCategory)) currentCategory = ChannelRepository.ALL;
         categoryAdapter.setSelectedCategory(currentCategory);
 
+        // Don't clobber the favourites or search view if the user is in one.
+        if (favoritesMode) {
+            return;
+        }
+        if (searching) {
+            applySearch(searchBox.getText().toString());
+            return;
+        }
+
         gridAdapter.setData(repo.getChannels(currentCategory));
 
         final int restore = focusedPos;
@@ -211,6 +390,13 @@ public class GridActivity extends AppCompatActivity {
 
     private void showCategory(String category) {
         currentCategory = category;
+        // Selecting a category exits search + favourites modes.
+        favoritesMode = false;
+        if (categoryBar.getVisibility() != View.VISIBLE) categoryBar.setVisibility(View.VISIBLE);
+        if (searching) {
+            searching = false;
+            if (searchBox.getText().length() > 0) searchBox.setText("");
+        }
         if (grid.isComputingLayout()) {
             grid.post(() -> {
                 gridAdapter.setData(repo.getChannels(category));
@@ -223,9 +409,24 @@ public class GridActivity extends AppCompatActivity {
     }
 
     private void openPlayer(int positionInCategory) {
+        // Pick the right channel bucket so the player zaps through the visible list.
+        String cat;
+        if (favoritesMode) {
+            cat = ChannelRepository.FAVORITES;
+        } else if (searching) {
+            cat = ChannelRepository.SEARCH;
+        } else {
+            cat = currentCategory;
+        }
         Intent i = new Intent(this, PlayerActivity.class);
-        i.putExtra(PlayerActivity.EXTRA_CATEGORY, currentCategory);
+        i.putExtra(PlayerActivity.EXTRA_CATEGORY, cat);
         i.putExtra(PlayerActivity.EXTRA_INDEX, positionInCategory);
         startActivity(i);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
     }
 }

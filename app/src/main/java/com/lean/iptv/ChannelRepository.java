@@ -33,6 +33,8 @@ import java.util.List;
 public final class ChannelRepository {
 
     public static final String ALL = "All";
+    public static final String SEARCH = "__search__"; // reserved key for live search results
+    public static final String FAVORITES = "__favorites__"; // reserved key for favorites view
     private static final int TIMEOUT_MS = 12000;
 
     private static ChannelRepository instance;
@@ -67,12 +69,42 @@ public final class ChannelRepository {
     }
 
     public List<String> getCategories() {
-        return new ArrayList<>(byCategory.keySet());
+        List<String> cats = new ArrayList<>(byCategory.keySet());
+        cats.remove(SEARCH);     // never show the reserved search bucket as a category
+        cats.remove(FAVORITES);  // favorites is reached via the star button, not a chip
+        return cats;
+    }
+
+    /** Store an arbitrary channel list under a reserved key (for player zapping). */
+    public void setBucket(String key, List<Channel> channels) {
+        byCategory.put(key, new ArrayList<>(channels));
     }
 
     public List<Channel> getChannels(String category) {
         List<Channel> l = byCategory.get(category);
         return l != null ? l : new ArrayList<>();
+    }
+
+    /**
+     * Fast search over the CURRENT source's channels only (the in-memory list).
+     * Case-insensitive substring match on the channel name. Results are also stored
+     * under the SEARCH key so the player can zap through them.
+     */
+    public List<Channel> search(String query) {
+        List<Channel> results = new ArrayList<>();
+        if (query == null) query = "";
+        String q = query.trim().toLowerCase();
+        if (q.isEmpty()) {
+            byCategory.put(SEARCH, results);
+            return results;
+        }
+        for (Channel c : all) {
+            if (c.name != null && c.name.toLowerCase().contains(q)) {
+                results.add(c);
+            }
+        }
+        byCategory.put(SEARCH, results);
+        return results;
     }
 
     /**

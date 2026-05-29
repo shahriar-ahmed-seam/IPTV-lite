@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Category chip. Focused = red, selected (active filter) = grey, idle = transparent. -->
+<!-- Category chip / spinner. Focused = violet gradient, selected = filled, idle = subtle. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/item_focused" />
-            <corners android:radius="20dp" />
+            <gradient
+                android:startColor="@color/accent"
+                android:endColor="@color/accent_deep"
+                android:angle="135" />
+            <corners android:radius="22dp" />
         </shape>
     </item>
     <item android:state_selected="true">
         <shape android:shape="rectangle">
             <solid android:color="@color/item_selected" />
-            <corners android:radius="20dp" />
+            <corners android:radius="22dp" />
+            <stroke android:width="1dp" android:color="@color/accent" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
             <solid android:color="@color/chip_idle" />
-            <corners android:radius="20dp" />
+            <corners android:radius="22dp" />
+            <stroke android:width="1dp" android:color="@color/tile_stroke" />
         </shape>
     </item>
 </selector>

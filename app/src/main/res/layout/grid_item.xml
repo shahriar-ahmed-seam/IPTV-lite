@@ -1,39 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One grid tile: logo (if available) + channel number + name. Focusable for D-pad. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- One grid tile: logo + name + number, with a favourite star overlay in the corner. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tileRoot"
     android:layout_width="match_parent"
-    android:layout_height="130dp"
-    android:layout_margin="6dp"
+    android:layout_height="140dp"
+    android:layout_margin="7dp"
     android:background="@drawable/tile_bg"
-    android:orientation="vertical"
-    android:gravity="center"
     android:focusable="true"
-    android:clickable="true"
-    android:padding="8dp">
+    android:clickable="true">
 
-    <ImageView
-        android:id="@+id/tileLogo"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginBottom="4dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@null" />
-
-    <TextView
-        android:id="@+id/tileName"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:gravity="center"
-        android:textColor="@color/text_focused"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:maxLines="2"
-        android:ellipsize="end" />
+        android:padding="10dp">
 
-    <TextView
-        android:id="@+id/tileNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/header_text"
-        android:textSize="12sp" />
-</LinearLayout>
+        <ImageView
+            android:id="@+id/tileLogo"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginBottom="8dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/tileName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/text_focused"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tileNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/header_text"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Favourite star, top-right corner. Not D-pad focusable (keeps tile navigation
+         clean); toggled via long-press on the tile, and tappable directly. -->
+    <ImageView
+        android:id="@+id/tileStar"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_gravity="top|end"
+        android:padding="4dp"
+        android:src="@drawable/ic_star_gray"
+        android:background="@drawable/star_focus_bg"
+        android:focusable="false"
+        android:clickable="true"
+        android:contentDescription="Favourite" />
+</FrameLayout>
