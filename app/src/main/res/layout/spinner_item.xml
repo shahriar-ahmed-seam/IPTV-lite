@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The closed (selected) spinner view. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
+    android:textColor="@color/text_focused"
+    android:textSize="15sp"
+    android:textStyle="bold"
+    android:singleLine="true" />

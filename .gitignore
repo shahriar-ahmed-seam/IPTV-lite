@@ -1,0 +1,23 @@
+# Build outputs
+.gradle/
+build/
+app/build/
+*/build/
+
+# Local config
+local.properties
+
+# Signing keystore — keep this PRIVATE, do not commit
+app/release.keystore
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Misc / temp
+build_out.txt
+*.log
+_updatetest/
+u*.xml
+pulled_cache.m3u8

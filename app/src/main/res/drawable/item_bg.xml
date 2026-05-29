@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-Pad focus indicator. state_focused = remote highlight, state_selected = current channel. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true" android:drawable="@color/item_focused" />
+    <item android:state_selected="true" android:drawable="@color/item_selected" />
+    <item android:drawable="@android:color/transparent" />
+</selector>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    android:padding="12dp">
+
+    <!-- Header row: title (left) + source dropdown (top-right corner) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="6dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Tarango"
+            android:textColor="@color/accent"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Source:"
+            android:textColor="@color/header_text"
+            android:textSize="13sp"
+            android:paddingEnd="8dp" />
+
+        <Spinner
+            android:id="@+id/sourceSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="160dp"
+            android:background="@drawable/chip_bg"
+            android:focusable="true"
+            android:popupBackground="@color/list_bg" />
+    </LinearLayout>
+
+    <!-- Category bar (horizontal, scrollable via D-pad) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/categoryBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:focusable="true"
+        android:descendantFocusability="afterDescendants" />
+
+    <!-- Channel grid -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/grid"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:focusable="true"
+        android:descendantFocusability="afterDescendants" />
+
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textColor="@color/text_focused"
+        android:textSize="18sp"
+        android:text="Loading channels..." />
+</LinearLayout>

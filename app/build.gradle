@@ -1,0 +1,56 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.lean.iptv'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.lean.iptv"
+        // Android 7.1 (S912 TX9 Pro) and up. 21 = Android 5.0 for max compatibility.
+        minSdk 21
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("release.keystore")
+            storePassword "bdlivetv2026"
+            keyAlias "bdlivetv"
+            keyPassword "bdlivetv2026"
+        }
+    }
+
+    buildTypes {
+        release {
+            // Keep it simple: no shrinking so the build is predictable on weak toolchains.
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        // Don't fail the release build on lint warnings; this is a self-contained app.
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+dependencies {
+    // Media3 ExoPlayer - hardware video decoding (HLS + DASH support)
+    implementation 'androidx.media3:media3-exoplayer:1.1.1'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.1.1'
+    implementation 'androidx.media3:media3-exoplayer-dash:1.1.1'
+    implementation 'androidx.media3:media3-ui:1.1.1'
+
+    // Lean list UI
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}

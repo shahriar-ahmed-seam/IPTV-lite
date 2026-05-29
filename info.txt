@@ -1,0 +1,57 @@
+To get this built lightning fast, you want a single-file template project so you don't waste time managing multiple directories, complex build gradle scripts, or complex state states.
+
+The secret to making it run on a weak Android TV box is writing a Lean Android TV Leanback Activity that avoids complex UI drawing. We will structure the code to utilize the native Android Media3 ExoPlayer coupled with a clean, remote-navigable RecyclerView.
+
+Below is the step-by-step strategy, followed by a highly optimized, comprehensive prompt designed specifically for Claude's coding engine.
+
+The Execution Strategy
+The Setup: Open Android Studio and create a new project with an Empty Views Activity (do not select the default Android TV template, as it includes heavy, modern layout structures that slow down older processors).
+
+The Layout: Use a split-screen approach. The left 30% is a plain text list of channels; the right 70% is a raw PlayerView.
+
+The Data Pipeline: Fetch the raw GitHub string asynchronously. Parse the #EXTINF metadata line to extract the channel name, and the following HTTP line for the stream URL.
+
+The Focus Engine: Ensure the items in your list are explicitly marked android:focusable="true". This tells the TV box to listen natively to the physical hardware D-Pad arrows on your remote.
+
+Copy-Paste Prompt for Claude
+Copy and paste the entire block below directly into Claude to generate your instant code blueprint:
+
+Plaintext
+Act as an expert Senior Android Engineer specializing in low-overhead, legacy Android TV firmware compatibility. 
+
+I need to build a single-file, ultra-lightweight Android TV Live IPTV streaming app. It is designed specifically to run smoothly on a weak, basic Android TV box (low RAM, outdated browser engine, and no Google Play Services). The app must have zero complex animations, zero heavy decorative layouts, and rely entirely on hardware remote D-Pad navigation.
+
+The application must dynamically pull and parse live Bangladeshi TV channels from this open-source network link: 
+"https://raw.githubusercontent.com/imShakil/tvlink/main/iptv.m3u8"
+
+Please generate the complete, production-ready code implementation split into these exact files:
+
+### 1. build.gradle (Dependencies)
+Provide a basic dependencies block. Use standard, stable Android Media3 ExoPlayer and basic UI components:
+- androidx.media3:media3-exoplayer
+- androidx.media3:media3-ui
+- androidx.recyclerview:recyclerview
+
+### 2. AndroidManifest.xml
+Include full internet permissions and the correct intent-filters to ensure the app boots as a lean TV activity:
+- android.permission.INTERNET
+- android.software.leanback (set required="false" for wide device compatibility)
+
+### 3. res/layout/activity_main.xml
+Create a high-performance, split-screen layout using a horizontal LinearLayout:
+- Left Side (30% width): A simple AndroidX RecyclerView to act as the channel guide list.
+- Right Side (70% width): An AndroidX Media3 PlayerView to handle the video stream hardware decoding.
+
+### 4. res/layout/channel_item.xml
+A highly scannable, simple text view for the channel rows. It must have:
+- android:focusable="true"
+- android:clickable="true"
+- A distinct visual background drawable state selector (or programmatically handled color shift) to clearly indicate when the physical TV remote D-Pad has highlighted/focused the item.
+
+### 5. MainActivity.java (or .kt)
+Provide the full, un-truncated Activity implementation that cleanly handles the following core modules:
+- M3U Parsing Logic: An asynchronous network call (using standard HttpURLConnection or basic background thread) to fetch the raw text from the provided GitHub M3U8 link. Implement a simple line-by-line string parser that extracts the channel names from '#EXTINF:-1,' and pairs them with the direct stream HTTP/M3U8 URLs immediately following them.
+- Focus & Remote Navigation: A lightweight RecyclerView Adapter where each item explicitly responds to D-Pad 'Focus Change' and 'Click/Select'.
+- Media3 ExoPlayer Lifecycle Instance: When a channel is focused or selected, pass the raw string stream URL directly into a cleanly managed ExoPlayer instance. It should release the player resources properly on Pause/Destroy to prevent memory leaks on weak hardware.
+
+Strictly avoid using any high-level compose components, decorative glassmorphism effects, or heavy UI wrapper frameworks. Keep the code straightforward, performant, and completely self-contained.

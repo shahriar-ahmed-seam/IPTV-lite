@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash window background: the full designed splash image, centered/scaled.
+     Shows instantly as the window background, no layout inflation. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/bg_dark" />
+    <item>
+        <bitmap
+            android:src="@drawable/splash_image"
+            android:gravity="fill" />
+    </item>
+</layer-list>
