@@ -9,8 +9,8 @@ android {
         // Android 7.1 (S912 TX9 Pro) and up. 21 = Android 5.0 for max compatibility.
         minSdk 21
         targetSdk 35
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
     }
 
     signingConfigs {

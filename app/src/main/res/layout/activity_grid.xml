@@ -38,6 +38,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:maxWidth="420dp"
             android:background="@drawable/search_bg"
             android:hint="Search channels..."
             android:textColorHint="@color/header_text"
@@ -60,24 +61,37 @@
             android:text="Source"
             android:textColor="@color/header_text"
             android:textSize="12sp"
-            android:paddingStart="20dp"
+            android:paddingStart="16dp"
             android:paddingEnd="8dp" />
 
         <Spinner
             android:id="@+id/sourceSpinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="150dp"
+            android:minWidth="140dp"
             android:background="@drawable/chip_bg"
             android:focusable="true"
             android:popupBackground="@color/list_bg" />
+
+        <!-- Add / manage custom sources -->
+        <ImageView
+            android:id="@+id/addSourceButton"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="10dp"
+            android:padding="10dp"
+            android:src="@android:drawable/ic_input_add"
+            android:background="@drawable/chip_bg"
+            android:focusable="true"
+            android:clickable="true"
+            android:contentDescription="Add source" />
 
         <!-- Favourites toggle button (star). Shows the saved-favourites view. -->
         <ImageView
             android:id="@+id/favButton"
             android:layout_width="46dp"
             android:layout_height="46dp"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="10dp"
             android:padding="9dp"
             android:src="@drawable/ic_star_gold"
             android:background="@drawable/chip_bg"

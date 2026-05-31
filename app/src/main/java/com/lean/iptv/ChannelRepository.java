@@ -196,6 +196,20 @@ public final class ChannelRepository {
         }, "warm-all-sources").start();
     }
 
+    /** Warm a single source (used when the user adds a custom source at runtime). */
+    public void warmSource(Context ctx, final PlaylistSource s) {
+        final Context app = ctx.getApplicationContext();
+        new Thread(() -> {
+            try {
+                String raw = fetch(s.url);
+                if (raw != null && raw.contains("#EXTINF")) {
+                    writeFile(new File(app.getFilesDir(), s.cacheFile), raw);
+                    LogoLoader.get(app).prefetchAll(M3UParser.parse(raw));
+                }
+            } catch (Throwable ignored) {}
+        }, "warm-one-source").start();
+    }
+
     private void build(List<Channel> parsed) {
         all.clear();
         all.addAll(parsed);

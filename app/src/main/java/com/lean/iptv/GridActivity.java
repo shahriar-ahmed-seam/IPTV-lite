@@ -31,6 +31,7 @@ public class GridActivity extends AppCompatActivity {
     private Spinner sourceSpinner;
     private EditText searchBox;
     private ImageView favButton;
+    private ImageView addSourceButton;
     private RecyclerView categoryBar;
     private RecyclerView grid;
     private TextView statusText;
@@ -64,6 +65,7 @@ public class GridActivity extends AppCompatActivity {
         sourceSpinner = findViewById(R.id.sourceSpinner);
         searchBox = findViewById(R.id.searchBox);
         favButton = findViewById(R.id.favButton);
+        addSourceButton = findViewById(R.id.addSourceButton);
         categoryBar = findViewById(R.id.categoryBar);
         grid = findViewById(R.id.grid);
         statusText = findViewById(R.id.statusText);
@@ -80,12 +82,13 @@ public class GridActivity extends AppCompatActivity {
         gridAdapter.setStarListener((pos, channel, isFav) -> onStarClicked(channel));
         grid.setAdapter(gridAdapter);
 
-        sources = PlaylistSource.all();
+        sources = PlaylistSource.all(this);
         currentSourceIndex = clampSourceIndex(Prefs.lastSourceIndex(this));
 
         setupSourceSpinner();
         setupSearch();
         favButton.setOnClickListener(v -> toggleFavoritesView());
+        addSourceButton.setOnClickListener(v -> showManageSourcesDialog());
 
         // Warm every source's playlist + logos once, so switching is instant later.
         repo.warmAllSources(this, sources);
@@ -125,6 +128,86 @@ public class GridActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+    }
+
+    /** Rebuild the spinner contents after custom sources change, keeping current selection. */
+    private void rebuildSourceSpinner() {
+        sources = PlaylistSource.all(this);
+        if (currentSourceIndex >= sources.size()) currentSourceIndex = 0;
+        ArrayAdapter<PlaylistSource> spinnerAdapter = new ArrayAdapter<>(
+                this, R.layout.spinner_item, sources);
+        spinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spinnerReady = false; // suppress the programmatic selection callback
+        sourceSpinner.setAdapter(spinnerAdapter);
+        sourceSpinner.setSelection(currentSourceIndex, false);
+    }
+
+    // ---------- custom sources (import / delete) ----------
+
+    private void showManageSourcesDialog() {
+        View content = getLayoutInflater().inflate(R.layout.dialog_add_source, null);
+        final EditText nameIn = content.findViewById(R.id.inputName);
+        final EditText urlIn = content.findViewById(R.id.inputUrl);
+        final android.widget.LinearLayout listBox = content.findViewById(R.id.customList);
+        final TextView empty = content.findViewById(R.id.emptyCustom);
+
+        final CustomSources cs = CustomSources.get(this);
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Add / manage sources")
+                .setView(content)
+                .setPositiveButton("Add", null) // overridden below to avoid auto-dismiss
+                .setNegativeButton("Close", null)
+                .create();
+
+        // Populates the list of existing custom sources with delete buttons.
+        final Runnable[] refreshList = new Runnable[1];
+        refreshList[0] = () -> {
+            listBox.removeAllViews();
+            java.util.List<String[]> entries = cs.entries();
+            empty.setVisibility(entries.isEmpty() ? View.VISIBLE : View.GONE);
+            for (String[] e : entries) {
+                final String name = e[0];
+                final String url = e[1];
+                View row = getLayoutInflater().inflate(R.layout.custom_source_row, listBox, false);
+                ((TextView) row.findViewById(R.id.rowName)).setText(name);
+                row.findViewById(R.id.rowDelete).setOnClickListener(v -> {
+                    cs.remove(url);
+                    rebuildSourceSpinner();
+                    refreshList[0].run();
+                    Toast.makeText(this, "Removed " + name, Toast.LENGTH_SHORT).show();
+                });
+                listBox.addView(row);
+            }
+        };
+        refreshList[0].run();
+
+        dialog.setOnShowListener(d -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String name = nameIn.getText().toString().trim();
+                String url = urlIn.getText().toString().trim();
+                if (url.isEmpty() || !(url.startsWith("http://") || url.startsWith("https://"))) {
+                    Toast.makeText(this, "Enter a valid http(s) playlist URL", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (cs.exists(url)) {
+                    Toast.makeText(this, "That source is already added", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                cs.add(name, url);
+                rebuildSourceSpinner();
+                refreshList[0].run();
+                final String addedUrl = url;
+                nameIn.setText("");
+                urlIn.setText("");
+                // Warm just the newly added source in the background (cache its playlist).
+                for (PlaylistSource ps : sources) {
+                    if (ps.url.equals(addedUrl)) { repo.warmSource(this, ps); break; }
+                }
+                Toast.makeText(this, "Source added", Toast.LENGTH_SHORT).show();
+            });
+        });
+
+        dialog.show();
     }
 
     // ---------- search (scoped to the active source) ----------

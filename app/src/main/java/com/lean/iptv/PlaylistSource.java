@@ -1,5 +1,6 @@
 package com.lean.iptv;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,8 +25,8 @@ public final class PlaylistSource {
         this.assetFile = assetFile;
     }
 
-    /** The fixed set of sources. "Bangla TV" is the default (index 0). */
-    public static List<PlaylistSource> all() {
+    /** The fixed built-in sources. "Source 1" is the default (index 0). */
+    public static List<PlaylistSource> builtIn() {
         return Arrays.asList(
             new PlaylistSource(
                 "Source 1",
@@ -43,6 +44,15 @@ public final class PlaylistSource {
                 "cache_mylist.m3u8",
                 "mylist.m3u8")
         );
+    }
+
+    /** Built-in sources followed by any user-added custom sources. */
+    public static List<PlaylistSource> all(android.content.Context ctx) {
+        List<PlaylistSource> list = new ArrayList<>(builtIn());
+        if (ctx != null) {
+            list.addAll(CustomSources.get(ctx).asSources());
+        }
+        return list;
     }
 
     @Override

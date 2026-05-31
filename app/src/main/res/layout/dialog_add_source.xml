@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/list_bg"
+    android:padding="20dp">
+
+    <EditText
+        android:id="@+id/inputName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Source name (e.g. My Sports)"
+        android:textColorHint="@color/header_text"
+        android:textColor="@color/text_focused"
+        android:background="@drawable/search_bg"
+        android:singleLine="true"
+        android:inputType="text"
+        android:padding="12dp"
+        android:layout_marginBottom="10dp" />
+
+    <EditText
+        android:id="@+id/inputUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Playlist URL (https://.../playlist.m3u)"
+        android:textColorHint="@color/header_text"
+        android:textColor="@color/text_focused"
+        android:background="@drawable/search_bg"
+        android:singleLine="true"
+        android:inputType="textUri"
+        android:padding="12dp"
+        android:layout_marginBottom="6dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Your sources"
+        android:textColor="@color/header_text"
+        android:textSize="13sp"
+        android:paddingTop="12dp"
+        android:paddingBottom="6dp" />
+
+    <!-- Existing custom sources get added here, each with a Delete button. -->
+    <LinearLayout
+        android:id="@+id/customList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <TextView
+        android:id="@+id/emptyCustom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No custom sources yet."
+        android:textColor="@color/header_text"
+        android:textSize="13sp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp" />
+</LinearLayout>
