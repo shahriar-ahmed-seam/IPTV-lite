@@ -1,0 +1,52 @@
+{
+  "name": "tarango-desktop",
+  "version": "1.0.0",
+  "description": "Tarango — Lightweight IPTV Desktop Player",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-builder --win"
+  },
+  "author": "Tarango",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "dependencies": {
+    "hls.js": "^1.5.0"
+  },
+  "build": {
+    "appId": "com.lean.tarango",
+    "productName": "Tarango",
+    "copyright": "Copyright © 2026 Tarango",
+    "files": [
+      "main.js",
+      "index.html",
+      "styles.css",
+      "app.js",
+      "assets/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/splash_image.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Tarango IPTV"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+#EXTM3U
+# Tarango - "My List" custom playlist
+# Add your own channels below. Format for each channel (two lines):
+#
+#   #EXTINF:-1 tvg-logo="LOGO_IMAGE_URL" group-title="CATEGORY",Channel Name
+#   STREAM_URL
+#
+# - group-title becomes a category chip in the app (e.g. Sports, Movies, News).
+# - tvg-logo is optional; if omitted or broken, the tile shows the name only.
+# - DRM-protected streams (#KODIPROP / license_key) are skipped automatically.
+# After editing, just commit & push. The app picks up changes on next launch.
+
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/en/8/89/Mr._Bean_The_Animated_Series_title_card.jpg" group-title="Cartoon",Mr Bean Animated
+https://amg00627-amg00627c31-rakuten-fr-3991.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanfrcc-rakutenfr/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Cartoon", Anime Espaniol
+https://dvu7aia8rjlfm.cloudfront.net/master.m3u8

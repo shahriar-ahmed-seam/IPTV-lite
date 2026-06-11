@@ -28,3 +28,8 @@ Tarango-v*.apk
 # Source art (already processed into app/src/main/res) and personal notes
 art/
 info.txt
+
+# Electron app build and dependencies
+tarango-desktop/node_modules/
+tarango-desktop/dist/
+
