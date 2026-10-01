@@ -29,6 +29,9 @@
       "index.html",
       "styles.css",
       "app.js",
+      "pip.html",
+      "pip.css",
+      "pip.js",
       "assets/**/*",
       "node_modules/**/*"
     ],

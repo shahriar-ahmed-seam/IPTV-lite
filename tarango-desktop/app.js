@@ -49,6 +49,42 @@ $('#btn-minimize').addEventListener('click', () => ipcRenderer.send('window-mini
 $('#btn-maximize').addEventListener('click', () => ipcRenderer.send('window-maximize'));
 $('#btn-close').addEventListener('click', () => ipcRenderer.send('window-close'));
 
+const btnTitleFs = $('#btn-title-fullscreen');
+if (btnTitleFs) {
+  btnTitleFs.addEventListener('click', toggleWindowFullscreen);
+}
+
+function toggleWindowFullscreen() {
+  const isFs = ipcRenderer.sendSync('window-fullscreen-toggle');
+  updateFullscreenUI(isFs);
+  return isFs;
+}
+
+function updateFullscreenUI(isFs) {
+  // Titlebar icons
+  const titleEnter = $('#icon-title-fs-enter');
+  const titleExit = $('#icon-title-fs-exit');
+  if (titleEnter) titleEnter.style.display = isFs ? 'none' : 'block';
+  if (titleExit) titleExit.style.display = isFs ? 'block' : 'none';
+
+  // Player top action icons
+  const playerEnter = $('#icon-player-fs-enter');
+  const playerExit = $('#icon-player-fs-exit');
+  if (playerEnter) playerEnter.style.display = isFs ? 'none' : 'block';
+  if (playerExit) playerExit.style.display = isFs ? 'block' : 'none';
+
+  // Player bottom action icons
+  const bottomEnter = $('#icon-bottom-fs-enter');
+  const bottomExit = $('#icon-bottom-fs-exit');
+  if (bottomEnter) bottomEnter.style.display = isFs ? 'none' : 'block';
+  if (bottomExit) bottomExit.style.display = isFs ? 'block' : 'none';
+}
+
+ipcRenderer.on('window-fullscreen-state', (event, isFs) => {
+  updateFullscreenUI(isFs);
+});
+
+
 // ============================================================
 // Toast
 // ============================================================
@@ -953,11 +989,69 @@ function hideStatus() {
 // ============================================================
 // Player
 // ============================================================
+let mainLastVolume = 1;
+let playerControlsTimeout = null;
+
+function triggerPlayerControlsActive() {
+  const overlay = $('#player-overlay');
+  if (!overlay || !overlay.classList.contains('active')) return;
+  overlay.classList.add('controls-active');
+  clearTimeout(playerControlsTimeout);
+  playerControlsTimeout = setTimeout(() => {
+    overlay.classList.remove('controls-active');
+  }, 2800);
+}
+
 function setupPlayer() {
+  const video = $('#player-video');
+  const overlay = $('#player-overlay');
+
+  // Back button
   $('#player-back').addEventListener('click', closePlayer);
 
+  // Fullscreen buttons
+  const btnFsTop = $('#btn-player-fullscreen');
+  if (btnFsTop) btnFsTop.addEventListener('click', toggleWindowFullscreen);
+  const btnFsBottom = $('#btn-player-fs-bottom');
+  if (btnFsBottom) btnFsBottom.addEventListener('click', toggleWindowFullscreen);
+
+  // Pop-up Viewer buttons
+  const btnPipTop = $('#btn-player-pip');
+  if (btnPipTop) btnPipTop.addEventListener('click', openPopUpViewer);
+  const btnPipBottom = $('#btn-player-pip-bottom');
+  if (btnPipBottom) btnPipBottom.addEventListener('click', openPopUpViewer);
+
+  // Playback controls
+  const btnPlay = $('#btn-player-play');
+  if (btnPlay) btnPlay.addEventListener('click', toggleMainPlay);
+  const btnPrev = $('#btn-player-prev');
+  if (btnPrev) btnPrev.addEventListener('click', prevChannel);
+  const btnNext = $('#btn-player-next');
+  if (btnNext) btnNext.addEventListener('click', nextChannel);
+
+  // Volume & Mute
+  const btnMute = $('#btn-player-mute');
+  if (btnMute) btnMute.addEventListener('click', toggleMainMute);
+  const volSlider = $('#player-volume-slider');
+  if (volSlider) {
+    volSlider.addEventListener('input', (e) => setMainVolume(e.target.value));
+  }
+
+  // Video click & double-click
+  video.addEventListener('click', (e) => {
+    // Avoid triggering when clicking buttons
+    if (e.target === video) toggleMainPlay();
+  });
+  video.addEventListener('dblclick', (e) => {
+    if (e.target === video) toggleWindowFullscreen();
+  });
+
+  // Controls idle active state
+  overlay.addEventListener('mousemove', triggerPlayerControlsActive);
+  overlay.addEventListener('mousedown', triggerPlayerControlsActive);
+
+  // Keyboard controls
   document.addEventListener('keydown', (e) => {
-    const overlay = $('#player-overlay');
     if (!overlay.classList.contains('active')) {
       // Escape in main view exits favorites/search
       if (e.key === 'Escape') {
@@ -967,18 +1061,62 @@ function setupPlayer() {
       return;
     }
 
+    triggerPlayerControlsActive();
+
+    // Prevent handling if typing in search input
+    if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+      return;
+    }
+
     switch (e.key) {
       case 'ArrowUp':
+      case '[':
         prevChannel();
         e.preventDefault();
         break;
       case 'ArrowDown':
+      case ']':
         nextChannel();
+        e.preventDefault();
+        break;
+      case ' ':
+        toggleMainPlay();
+        e.preventDefault();
+        break;
+      case 'f':
+      case 'F':
+      case 'F11':
+        toggleWindowFullscreen();
+        e.preventDefault();
+        break;
+      case 'p':
+      case 'P':
+        openPopUpViewer();
+        e.preventDefault();
+        break;
+      case 'm':
+      case 'M':
+        toggleMainMute();
+        e.preventDefault();
+        break;
+      case 'ArrowLeft':
+        adjustMainVolume(-0.08);
+        e.preventDefault();
+        break;
+      case 'ArrowRight':
+        adjustMainVolume(0.08);
         e.preventDefault();
         break;
       case 'Escape':
       case 'Backspace':
-        closePlayer();
+        {
+          const isFs = ipcRenderer.sendSync('window-is-fullscreen');
+          if (isFs) {
+            toggleWindowFullscreen();
+          } else {
+            closePlayer();
+          }
+        }
         e.preventDefault();
         break;
       case 'Enter':
@@ -994,6 +1132,103 @@ function setupPlayer() {
     }
   });
 }
+
+function toggleMainPlay() {
+  const video = $('#player-video');
+  if (video.paused) {
+    video.play().catch(() => {});
+    updateMainPlayIcons(true);
+  } else {
+    video.pause();
+    updateMainPlayIcons(false);
+  }
+}
+
+function updateMainPlayIcons(isPlaying) {
+  const playIcon = $('#icon-main-play');
+  const pauseIcon = $('#icon-main-pause');
+  if (playIcon) playIcon.style.display = isPlaying ? 'none' : 'block';
+  if (pauseIcon) pauseIcon.style.display = isPlaying ? 'block' : 'none';
+}
+
+function toggleMainMute() {
+  const video = $('#player-video');
+  const slider = $('#player-volume-slider');
+  if (video.muted || video.volume === 0) {
+    video.muted = false;
+    video.volume = mainLastVolume || 1;
+    if (slider) slider.value = video.volume;
+    updateMainVolumeIcon(video.volume);
+    showBanner('Volume: ' + Math.round(video.volume * 100) + '%');
+  } else {
+    mainLastVolume = video.volume;
+    video.muted = true;
+    if (slider) slider.value = 0;
+    updateMainVolumeIcon(0);
+    showBanner('Muted');
+  }
+}
+
+function setMainVolume(val) {
+  const video = $('#player-video');
+  const slider = $('#player-volume-slider');
+  const v = Math.max(0, Math.min(1, parseFloat(val)));
+  video.muted = (v === 0);
+  video.volume = v;
+  if (slider) slider.value = v;
+  if (v > 0) mainLastVolume = v;
+  updateMainVolumeIcon(v);
+}
+
+function adjustMainVolume(delta) {
+  const video = $('#player-video');
+  const cur = video.muted ? 0 : video.volume;
+  const next = Math.max(0, Math.min(1, cur + delta));
+  setMainVolume(next);
+  showBanner('Volume: ' + Math.round(next * 100) + '%');
+}
+
+function updateMainVolumeIcon(vol) {
+  const video = $('#player-video');
+  const isMuted = video.muted || vol === 0;
+  const muteIcon = $('#icon-main-vol-mute');
+  const highIcon = $('#icon-main-vol-high');
+  if (muteIcon) muteIcon.style.display = isMuted ? 'block' : 'none';
+  if (highIcon) highIcon.style.display = isMuted ? 'none' : 'block';
+}
+
+function openPopUpViewer() {
+  const channel = playerChannels[playerIndex];
+  if (!channel) return;
+
+  const video = $('#player-video');
+  video.pause();
+  destroyHls();
+  $('#player-overlay').classList.remove('active');
+
+  ipcRenderer.send('open-pip', {
+    channel,
+    index: playerIndex,
+    channels: playerChannels,
+    minimizeMain: false
+  });
+
+  showToast('Watching ' + channel.name + ' in Pop-up Viewer');
+}
+
+ipcRenderer.on('resume-from-pip', (event, data) => {
+  if (data && data.channel) {
+    if (data.channels && data.channels.length > 0) {
+      playerChannels = data.channels;
+    }
+    if (typeof data.index === 'number') {
+      playerIndex = data.index;
+    }
+    $('#player-overlay').classList.add('active');
+    playCurrent();
+    showToast('Restored to Main Player');
+  }
+});
 
 function openPlayer(positionInCategory) {
   let cat;
@@ -1013,6 +1248,7 @@ function openPlayer(positionInCategory) {
   if (playerIndex < 0 || playerIndex >= playerChannels.length) playerIndex = 0;
 
   $('#player-overlay').classList.add('active');
+  triggerPlayerControlsActive();
   playCurrent();
 }
 
@@ -1023,6 +1259,7 @@ function closePlayer() {
   video.pause();
   video.removeAttribute('src');
   video.load();
+  updateMainPlayIcons(false);
 }
 
 function playCurrent() {
@@ -1042,6 +1279,7 @@ function playStream(url) {
   // Reset video
   video.pause();
   video.removeAttribute('src');
+  updateMainPlayIcons(true);
 
   if (Hls.isSupported() && (url.includes('.m3u8') || url.includes('.m3u'))) {
     hls = new Hls({
@@ -1057,6 +1295,7 @@ function playStream(url) {
 
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       video.play().catch(() => {});
+      updateMainPlayIcons(true);
     });
 
     hls.on(Hls.Events.ERROR, (event, data) => {
@@ -1077,10 +1316,17 @@ function playStream(url) {
     video.play().catch(() => {
       showPlayerStatus('Channel unavailable. Press ↑/↓ for another.');
     });
+    updateMainPlayIcons(true);
   }
 
   // Listen for video events
-  video.onplaying = () => hidePlayerStatus();
+  video.onplaying = () => {
+    hidePlayerStatus();
+    updateMainPlayIcons(true);
+  };
+  video.onpause = () => {
+    updateMainPlayIcons(false);
+  };
   video.onwaiting = () => showPlayerStatus('Buffering...');
   video.onerror = () => showPlayerStatus('Channel unavailable. Press ↑/↓ for another.');
 }

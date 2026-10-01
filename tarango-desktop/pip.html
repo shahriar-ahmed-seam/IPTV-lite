@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarango — Mini Player</title>
+  <link rel="stylesheet" href="pip.css">
+</head>
+<body>
+  <div id="pip-container">
+    <!-- Video Player -->
+    <video id="pip-video" autoplay playsinline></video>
+
+    <!-- Loading / Status indicator -->
+    <div id="pip-status" class="pip-status">Connecting...</div>
+
+    <!-- OSD Banner on channel change -->
+    <div id="pip-banner" class="pip-banner"></div>
+
+    <!-- Drag & Title Bar (Top) -->
+    <div id="pip-topbar" class="pip-overlay-bar top">
+      <div class="pip-title-info">
+        <span class="pip-live-indicator"><span class="dot"></span>LIVE</span>
+        <span id="pip-channel-name" class="pip-channel-name">Channel</span>
+      </div>
+      <div class="pip-top-actions">
+        <button id="btn-pip-pin" class="pip-btn active" title="Toggle Always on Top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="17" x2="12" y2="22"></line>
+            <path d="M5 17h14v-2l-2-2V5a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v8l-2 2v2z"></path>
+          </svg>
+        </button>
+        <button id="btn-pip-minimize-main" class="pip-btn" title="Minimize Main App Window">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+            <line x1="8" y1="16" x2="16" y2="16"></line>
+          </svg>
+        </button>
+        <button id="btn-pip-restore" class="pip-btn" title="Restore to Main App (R)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+        </button>
+        <button id="btn-pip-close" class="pip-btn close" title="Close Pop-up (Esc)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Play/Pause Flash / Button -->
+    <div id="pip-center-control" class="pip-center-control">
+      <button id="btn-pip-center-play" class="pip-center-btn" title="Play / Pause (Space)">
+        <svg id="icon-pip-center-pause" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+          <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+        </svg>
+        <svg id="icon-pip-center-play" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Controls Bar (Bottom) -->
+    <div id="pip-bottombar" class="pip-overlay-bar bottom">
+      <div class="pip-controls-left">
+        <button id="btn-pip-prev" class="pip-btn" title="Previous Channel (↑ or [)">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="19 20 9 12 19 4 19 20"></polygon>
+            <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"></line>
+          </svg>
+        </button>
+        <button id="btn-pip-play" class="pip-btn" title="Play / Pause (Space)">
+          <svg id="icon-pip-pause" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+            <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+          </svg>
+          <svg id="icon-pip-play" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </button>
+        <button id="btn-pip-next" class="pip-btn" title="Next Channel (↓ or ])">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 4 15 12 5 20 5 4"></polygon>
+            <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"></line>
+          </svg>
+        </button>
+        <div class="pip-volume-group">
+          <button id="btn-pip-mute" class="pip-btn" title="Mute / Unmute (M)">
+            <svg id="icon-pip-vol-high" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <svg id="icon-pip-vol-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          </button>
+          <input type="range" id="pip-volume-slider" class="pip-vol-slider" min="0" max="1" step="0.05" value="1" title="Volume">
+        </div>
+      </div>
+
+      <div class="pip-controls-right">
+        <span id="pip-channel-count" class="pip-channel-count">--/--</span>
+        <button id="btn-pip-fit" class="pip-btn" title="Toggle Aspect Fit / Cover">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="pip.js"></script>
+</body>
+</html>

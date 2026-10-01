@@ -16,6 +16,10 @@
       <span>Tarango</span>
     </div>
     <div class="titlebar-controls">
+      <button class="titlebar-btn" id="btn-title-fullscreen" title="Toggle Fullscreen (F11)">
+        <svg id="icon-title-fs-enter" viewBox="0 0 16 16"><path d="M1.5 1.5h4v1h-3v3h-1v-4zm9 0h4v4h-1v-3h-3v-1zm4 9v4h-4v-1h3v-3h1zm-13 3v-3h1v3h3v1h-4z" fill="currentColor"/></svg>
+        <svg id="icon-title-fs-exit" viewBox="0 0 16 16" style="display:none;"><path d="M5.5 5.5h-4v-1h3v-3h1v4zm5 0h4v-1h-3v-3h-1v4zm4 5h-4v1h3v3h1v-4zm-9 1h-3v-3h-1v4h4v-1z" fill="currentColor"/></svg>
+      </button>
       <button class="titlebar-btn" id="btn-minimize" title="Minimize">
         <svg viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="1" fill="currentColor"/></svg>
       </button>
@@ -70,17 +74,107 @@
     <div class="player-banner" id="player-banner"></div>
     <div class="player-number-entry" id="player-number"></div>
     <div class="player-status" id="player-status"></div>
-    <button class="player-back-btn" id="player-back" title="Back to channels">✕</button>
+
+    <!-- Player Top Action Buttons -->
+    <div class="player-top-actions">
+      <button class="player-action-btn" id="btn-player-pip" title="Pop-up Resizable Viewer (P) - Watch while working">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+          <rect x="11" y="9" width="9" height="7" rx="1" fill="currentColor" fill-opacity="0.3"></rect>
+        </svg>
+      </button>
+      <button class="player-action-btn" id="btn-player-fullscreen" title="Toggle Fullscreen (F / F11)">
+        <svg id="icon-player-fs-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+        <svg id="icon-player-fs-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <polyline points="4 14 10 14 10 20"></polyline>
+          <polyline points="20 10 14 10 14 4"></polyline>
+          <line x1="14" y1="10" x2="21" y2="3"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      </button>
+      <button class="player-action-btn close" id="player-back" title="Back to channels (Esc)">✕</button>
+    </div>
+
+    <!-- Modern Interactive Bottom Control Bar -->
     <div class="player-channel-bar" id="player-channel-bar">
-      <img class="player-ch-logo" id="player-ch-logo" alt="">
-      <div>
-        <div class="player-ch-name" id="player-ch-name"></div>
-        <div class="player-ch-group" id="player-ch-group"></div>
+      <!-- Left: Channel Info -->
+      <div class="player-bar-left">
+        <img class="player-ch-logo" id="player-ch-logo" alt="">
+        <div class="player-ch-details">
+          <div class="player-ch-title-row">
+            <span class="player-live-badge"><span class="dot"></span>LIVE</span>
+            <span class="player-ch-name" id="player-ch-name"></span>
+          </div>
+          <div class="player-ch-group" id="player-ch-group"></div>
+        </div>
+      </div>
+
+      <!-- Center: Playback Controls -->
+      <div class="player-bar-center">
+        <button class="player-ctrl-btn" id="btn-player-prev" title="Previous Channel (↑ or [)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"></line></svg>
+        </button>
+        <button class="player-ctrl-btn play-pause" id="btn-player-play" title="Play / Pause (Space)">
+          <svg id="icon-main-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
+          <svg id="icon-main-play" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        </button>
+        <button class="player-ctrl-btn" id="btn-player-next" title="Next Channel (↓ or ])">
+          <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"></line></svg>
+        </button>
+      </div>
+
+      <!-- Right: Volume + Pop-up + Fullscreen -->
+      <div class="player-bar-right">
+        <div class="player-volume-wrapper">
+          <button class="player-ctrl-btn" id="btn-player-mute" title="Mute / Unmute (M)">
+            <svg id="icon-main-vol-high" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <svg id="icon-main-vol-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          </button>
+          <input type="range" id="player-volume-slider" class="player-vol-range" min="0" max="1" step="0.05" value="1" title="Volume">
+        </div>
+        <button class="player-ctrl-btn" id="btn-player-pip-bottom" title="Pop-up Resizable Viewer (P) - Watch while working">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+            <rect x="11" y="9" width="9" height="7" rx="1" fill="currentColor" fill-opacity="0.3"></rect>
+          </svg>
+        </button>
+        <button class="player-ctrl-btn" id="btn-player-fs-bottom" title="Fullscreen (F / F11)">
+          <svg id="icon-bottom-fs-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+          <svg id="icon-bottom-fs-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <polyline points="4 14 10 14 10 20"></polyline>
+            <polyline points="20 10 14 10 14 4"></polyline>
+            <line x1="14" y1="10" x2="21" y2="3"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+        </button>
       </div>
     </div>
+
+    <!-- Quick shortcuts hint -->
     <div class="player-controls-hint">
-      <span class="hint-key"><kbd>↑</kbd> Prev</span>
-      <span class="hint-key"><kbd>↓</kbd> Next</span>
+      <span class="hint-key"><kbd>Space</kbd> Play/Pause</span>
+      <span class="hint-key"><kbd>F</kbd> Fullscreen</span>
+      <span class="hint-key"><kbd>P</kbd> Pop-up</span>
+      <span class="hint-key"><kbd>↑</kbd><kbd>↓</kbd> Channels</span>
+      <span class="hint-key"><kbd>←</kbd><kbd>→</kbd> Vol</span>
+      <span class="hint-key"><kbd>M</kbd> Mute</span>
       <span class="hint-key"><kbd>0-9</kbd> Jump</span>
       <span class="hint-key"><kbd>Esc</kbd> Back</span>
     </div>
