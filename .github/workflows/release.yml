@@ -32,6 +32,12 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Prepare Signing Keystore
+        run: |
+          if [ ! -f app/release.keystore ]; then
+            keytool -genkeypair -v -keystore app/release.keystore -alias bdlivetv -keyalg RSA -keysize 2048 -validity 10000 -storepass bdlivetv2026 -keypass bdlivetv2026 -dname "CN=Tarango, OU=IPTV, O=Tarango, L=Dhaka, ST=Dhaka, C=BD"
+          fi
+
       - name: Build Android Release APK
         run: ./gradlew assembleRelease
 

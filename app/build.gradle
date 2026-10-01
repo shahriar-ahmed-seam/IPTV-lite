@@ -15,10 +15,12 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("release.keystore")
-            storePassword "bdlivetv2026"
-            keyAlias "bdlivetv"
-            keyPassword "bdlivetv2026"
+            if (file("release.keystore").exists()) {
+                storeFile file("release.keystore")
+                storePassword "bdlivetv2026"
+                keyAlias "bdlivetv"
+                keyPassword "bdlivetv2026"
+            }
         }
     }
 
@@ -26,7 +28,11 @@ android {
         release {
             // Keep it simple: no shrinking so the build is predictable on weak toolchains.
             minifyEnabled false
-            signingConfig signingConfigs.release
+            if (file("release.keystore").exists()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
