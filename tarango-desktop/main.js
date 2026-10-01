@@ -17,7 +17,7 @@ function createWindow() {
       contextIsolation: false,
       webSecurity: false     // Allow loading cross-origin HLS streams
     },
-    icon: path.join(__dirname, 'assets', 'splash_image.png'),
+    icon: path.join(__dirname, 'assets', 'icon.png'),
     show: false
   });
 

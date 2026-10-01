@@ -2,11 +2,14 @@
   "name": "tarango-desktop",
   "version": "1.0.0",
   "description": "Tarango — Lightweight IPTV Desktop Player",
+  "homepage": "https://github.com/shahriar-ahmed-seam/IPTV-lite",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "build": "electron-builder --win"
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
   },
   "author": "Tarango",
   "license": "MIT",
@@ -47,6 +50,23 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Tarango IPTV"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Video;AudioVideo;",
+      "icon": "assets/icons",
+      "maintainer": "Tarango <shahriarseam17@gmail.com>",
+      "synopsis": "Tarango IPTV Player",
+      "description": "Tarango — Lightweight IPTV Desktop Player",
+      "desktop": {
+        "Name": "Tarango",
+        "GenericName": "IPTV Player",
+        "Comment": "Tarango — Lightweight IPTV Desktop Player",
+        "Categories": "AudioVideo;Video;Player;TV;"
+      }
     }
   }
 }

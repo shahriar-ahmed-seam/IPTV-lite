@@ -58,6 +58,8 @@ playlist.m3u              The "My List" source (edit to add your channels)
 
 ## Building
 
+### Android
+
 Open in Android Studio and Run, or from the command line:
 
 ```
@@ -69,6 +71,34 @@ Sideload it onto the TV box (USB + file manager, allow unknown sources).
 
 - `minSdk 21` (Android 5.0+), targets modern SDK but stays backward compatible.
 - Built with Media3 ExoPlayer (HLS + DASH).
+
+### Desktop (Windows & Linux)
+
+Navigate to `tarango-desktop/`:
+
+```bash
+cd tarango-desktop
+npm install
+```
+
+- Run locally:
+  ```bash
+  npm start
+  ```
+- Build for Linux (AppImage & `.deb`):
+  ```bash
+  npm run build:linux
+  ```
+- Build for Windows (`.exe` NSIS installer):
+  ```bash
+  npm run build:win
+  ```
+
+Packages will be generated in `tarango-desktop/dist/`.
+On Ubuntu / Debian, install the deb package with:
+```bash
+sudo dpkg -i dist/tarango-desktop_*.deb
+```
 
 ## Disclaimer
 
