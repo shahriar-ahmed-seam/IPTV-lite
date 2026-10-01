@@ -57,6 +57,9 @@
         "deb"
       ],
       "category": "Video;AudioVideo;",
+      "executableArgs": [
+        "--no-sandbox"
+      ],
       "icon": "assets/icons",
       "maintainer": "Tarango <shahriarseam17@gmail.com>",
       "synopsis": "Tarango IPTV Player",
